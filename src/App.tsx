@@ -5,6 +5,7 @@ function App() {
   return (
     <div>
       <h1>Firestore CRUD</h1>
+      <AddUser />
       <UserList />
     </div>
   );

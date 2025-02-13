@@ -1,25 +1,26 @@
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { subscribeToUsers, updateUser, deleteUser } from "../firebase/firestore";
 import { useState, useEffect } from "react";
-import { getUsers, updateUser, deleteUser } from "../firebase/firestore";
-import AddUser from "./AddUser";
 
 const UserList = () => {
-  const [users, setUsers] = useState<any>([]);
+  const queryClient = useQueryClient();
+  const [users, setUsers] = useState<{ id: string; name: string; age: number }[]>([]);
   const [editId, setEditId] = useState<string | null>(null);
   const [editName, setEditName] = useState("");
   const [editAge, setEditAge] = useState("");
 
+  // Fetch real-time data using Firestore's onSnapshot
   useEffect(() => {
-    const fetchUsers = async () => {
-      const usersData = await getUsers();
-      setUsers(usersData);
-    };
-    fetchUsers();
+    const unsubscribe = subscribeToUsers((data) => {
+      setUsers(data);
+    });
+    return () => unsubscribe(); // Cleanup on unmount
   }, []);
 
   const handleUpdate = async (id: string) => {
     if (editName && editAge) {
       await updateUser(id, editName, parseInt(editAge));
-      setUsers(await getUsers());
+      queryClient.invalidateQueries(["users"]); // Refresh data
       setEditId(null);
       setEditName("");
       setEditAge("");
@@ -28,14 +29,12 @@ const UserList = () => {
 
   const handleDelete = async (id: string) => {
     await deleteUser(id);
-    setUsers(await getUsers());
+    queryClient.invalidateQueries(["users"]); // Refresh data
   };
 
   return (
-    <>
-    <AddUser users={users} setUsers={setUsers} />
     <ul>
-      {users.map((user:any) => (
+      {users.map((user) => (
         <li key={user.id}>
           {editId === user.id ? (
             <>
@@ -54,7 +53,6 @@ const UserList = () => {
         </li>
       ))}
     </ul>
-    </>
   );
 };
 

@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { addUser, getUsers } from "../firebase/firestore";
+import { addUser } from "../firebase/firestore";
 
-const AddUser:React.FC<any> = ({users,setUsers}) => {
+const AddUser = () => {
   const [name, setName] = useState("");
   const [age, setAge] = useState("");
 
@@ -12,7 +12,6 @@ const AddUser:React.FC<any> = ({users,setUsers}) => {
       setName("");
       setAge("");
       console.log("sucess")
-      setUsers(await getUsers());
     }
   };
 
